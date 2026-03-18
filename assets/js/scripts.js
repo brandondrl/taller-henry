@@ -1,109 +1,169 @@
-    // ---- Navbar scroll ----
-    const navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', () => {
-      navbar.classList.toggle('scrolled', window.scrollY > 40);
-    }, { passive: true });
+// =============================================
+// CONFIGURACIÓN
+// =============================================
+const WA_NUMBER = '584126466657'; // solo dígitos, sin + ni espacios
 
-    // ---- Hamburger menu ----
-    const hamburger = document.getElementById('hamburger');
-    const mobileMenu = document.getElementById('mobileMenu');
-
-    hamburger.addEventListener('click', () => {
-      const isOpen = mobileMenu.classList.toggle('open');
-      hamburger.setAttribute('aria-expanded', String(isOpen));
+// =============================================
+// TRACKING DE CTAs (GA4)
+// =============================================
+// Cuando GA4 esté activo, todos los elementos con
+// data-track="nombre-del-evento" registran un evento
+// automáticamente. Solo descomenta el bloque GA4 en
+// el <head> del index.html y esto funciona solo.
+//
+// Nomenclatura de eventos:
+//   nav-whatsapp         → WhatsApp desde la navbar
+//   hero-whatsapp-*      → Hero CTA
+//   service-ac-whatsapp  → CTA de servicio A/C
+//   service-mec-whatsapp → CTA de servicio mecánica
+//   service-pin-whatsapp → CTA de servicio pintura
+//   process-whatsapp     → CTA sección proceso
+//   contact-whatsapp-block → Bloque de contacto
+//   contact-*            → Formulario
+//   location-*           → Links de ubicación
+//   footer-*             → Footer
+//   fab-whatsapp         → Botón flotante
+//   reviews-google-link  → Link a Google
+//   form-submit          → Envío del formulario
+//
+function trackClick(eventName, label) {
+  if (typeof gtag !== 'undefined') {
+    gtag('event', eventName, {
+      event_category: 'cta',
+      event_label: label || eventName
     });
+  }
+}
 
-    // Close mobile menu on link click
-    mobileMenu.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        mobileMenu.classList.remove('open');
-        hamburger.setAttribute('aria-expanded', 'false');
-      });
-    });
+document.querySelectorAll('[data-track]').forEach(el => {
+  el.addEventListener('click', () => {
+    trackClick(el.getAttribute('data-track'));
+  });
+});
 
-    // ---- Intersection Observer for fade-up animations ----
-    const fadeEls = document.querySelectorAll('.fade-up');
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12 });
+// =============================================
+// NAVBAR – scroll
+// =============================================
+const navbar = document.getElementById('navbar');
 
-    fadeEls.forEach(el => observer.observe(el));
+const handleScroll = () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 48);
+};
 
-    // ---- Contact form ----
-    const form = document.getElementById('contactForm');
-    const formMsg = document.getElementById('formMsg');
+window.addEventListener('scroll', handleScroll, { passive: true });
+handleScroll();
 
-    // Input sanitization helper
-    function sanitize(str) {
-      return String(str).trim()
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#x27;')
-        .replace(/\//g, '&#x2F;');
+// =============================================
+// MENÚ HAMBURGER
+// =============================================
+const hamburger  = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+
+hamburger.addEventListener('click', () => {
+  const isOpen = mobileMenu.classList.toggle('open');
+  hamburger.setAttribute('aria-expanded', String(isOpen));
+});
+
+mobileMenu.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', () => {
+    mobileMenu.classList.remove('open');
+    hamburger.setAttribute('aria-expanded', 'false');
+  });
+});
+
+// =============================================
+// ANIMACIONES DE SCROLL
+// =============================================
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
     }
+  });
+}, { threshold: 0.1 });
 
-    // Phone validation (Venezuela format + international)
-    function isValidPhone(phone) {
-      return /^[\d\s\+\-\(\)]{7,20}$/.test(phone);
-    }
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
+// =============================================
+// FORMULARIO – validación + WhatsApp
+// =============================================
+const form    = document.getElementById('contactForm');
+const formMsg = document.getElementById('formMsg');
 
-      // Honeypot check
-      const hp = form.querySelector('[name="_hp_name"]');
-      if (hp && hp.value.trim() !== '') {
-        // Silently stop – it's a bot
-        return;
-      }
+function sanitize(str) {
+  return String(str).trim()
+    .replace(/&/g,  '&amp;')
+    .replace(/</g,  '&lt;')
+    .replace(/>/g,  '&gt;')
+    .replace(/"/g,  '&quot;')
+    .replace(/'/g,  '&#x27;');
+}
 
-      const nombre   = sanitize(form.nombre.value);
-      const telefono = sanitize(form.telefono.value);
-      const servicio = sanitize(form.servicio.value);
-      const mensaje  = sanitize(form.mensaje.value);
+function isValidPhone(p) { return /^[\d\s\+\-\(\)]{7,20}$/.test(p); }
 
-      // Validation
-      if (!nombre || nombre.length < 2) {
-        showMsg('Por favor ingresa tu nombre.', 'error');
-        form.nombre.focus();
-        return;
-      }
+function showMsg(text, type) {
+  formMsg.textContent = text;
+  formMsg.className   = 'form-msg ' + type;
+  formMsg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
 
-      if (!isValidPhone(telefono)) {
-        showMsg('Ingresa un número de teléfono válido.', 'error');
-        form.telefono.focus();
-        return;
-      }
+form.addEventListener('submit', e => {
+  e.preventDefault();
 
-      if (!servicio) {
-        showMsg('Por favor selecciona un servicio.', 'error');
-        form.servicio.focus();
-        return;
-      }
+  // Honeypot antispam
+  const hp = form.querySelector('[name="_hp"]');
+  if (hp && hp.value.trim() !== '') return;
 
-      // Build WhatsApp message and open
-      const texto = encodeURIComponent(
-        `Hola Henry! Me llamo ${nombre}.\n` +
-        `Teléfono: ${telefono}\n` +
-        `Servicio: ${servicio}\n` +
-        (mensaje ? `Mensaje: ${mensaje}` : '')
-      );
+  const nombre   = sanitize(form.nombre.value);
+  const telefono = sanitize(form.telefono.value);
+  const servicio = sanitize(form.servicio.value);
+  const mensaje  = sanitize(form.mensaje.value);
 
-      // REEMPLAZA con el número de WhatsApp real (solo dígitos, sin + ni espacios)
-      window.open(`https://wa.me/584XXXXXXXXX?text=${texto}`, '_blank', 'noopener,noreferrer');
+  if (!nombre || nombre.length < 2) {
+    showMsg('Por favor ingresa tu nombre.', 'error');
+    form.nombre.focus();
+    return;
+  }
+  if (!isValidPhone(telefono)) {
+    showMsg('Ingresa un número de teléfono válido.', 'error');
+    form.telefono.focus();
+    return;
+  }
+  if (!servicio) {
+    showMsg('Selecciona el servicio que necesitas.', 'error');
+    form.servicio.focus();
+    return;
+  }
 
-      showMsg('¡Perfecto! Te redirigimos a WhatsApp para continuar la conversación. 💬', 'success');
-      form.reset();
-    });
+  const lines = [
+    `Hola Henry, me llamo ${nombre}.`,
+    `Tel/WA: ${telefono}`,
+    `Servicio: ${servicio}`,
+    mensaje ? `Mensaje: ${mensaje}` : ''
+  ].filter(Boolean);
 
-    function showMsg(text, type) {
-      formMsg.textContent = text;
-      formMsg.className = 'form-msg ' + type;
-      formMsg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
+  window.open(
+    `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(lines.join('\n'))}`,
+    '_blank',
+    'noopener,noreferrer'
+  );
+
+  // =============================================
+  // FORMSPREE (opcional) – también recibe por email
+  // 1. Crea cuenta en formspree.io (gratis hasta 50/mes)
+  // 2. Copia tu endpoint ID
+  // 3. Descomenta y reemplaza TU_ID_AQUI
+  // =============================================
+  /*
+  fetch('https://formspree.io/f/TU_ID_AQUI', {
+    method: 'POST',
+    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nombre, telefono, servicio, mensaje })
+  });
+  */
+
+  trackClick('form-submit-success');
+  showMsg('Listo, te abrimos WhatsApp para continuar.', 'success');
+  form.reset();
+});
