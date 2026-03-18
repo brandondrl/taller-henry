@@ -1,7 +1,3 @@
-/* =============================================
-   VARIABLES – edita solo esta sección para
-   cambiar colores, tipografía o radios
-============================================= */
 :root {
   --blue:         #024D96;
   --blue-dark:    #003366;
@@ -32,9 +28,6 @@
   --font-body:    'DM Sans', sans-serif;
 }
 
-/* =============================================
-   RESET & BASE
-============================================= */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html { font-size: 17px; scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
@@ -52,18 +45,12 @@ a { color: inherit; text-decoration: none; }
 ul { list-style: none; }
 button { cursor: pointer; }
 
-/* =============================================
-   LAYOUT
-============================================= */
 .container { width: 100%; max-width: 1140px; margin: 0 auto; padding: 0 20px; }
 .section { padding: 64px 0; }
 .section--gray { background: var(--off-white); }
 .text-center { text-align: center; }
 .text-center .section-sub { margin-left: auto; margin-right: auto; }
 
-/* =============================================
-   TIPOGRAFÍA
-============================================= */
 .eyebrow {
   display: inline-block;
   font-size: 0.88rem;
@@ -74,7 +61,6 @@ button { cursor: pointer; }
   margin-bottom: 12px;
 }
 
-/* Tamaño base de titulares de sección */
 .section-title {
   font-family: var(--font-display);
   font-size: clamp(2rem, 5vw, 2.6rem);
@@ -84,13 +70,10 @@ button { cursor: pointer; }
   letter-spacing: 0.01em;
 }
 
-/* Variante más grande – para todos los títulos de sección principales */
 .section-title--xl {
   font-size: clamp(2.4rem, 6.5vw, 3.4rem);
 }
 
-/* La línea secundaria debajo del title principal de servicios – oculta,
-   ya que el título es explícito. Dejamos solo el eyebrow + title + sub */
 .section-title-secondary { display: none; }
 
 .title-accent { color: var(--blue); }
@@ -265,7 +248,7 @@ button { cursor: pointer; }
    HERO – mobile first
 ============================================= */
 .hero {
-  min-height: calc(100svh - 48px); /* 48px = altura del trust bar */
+  min-height: calc(100svh - 50px);
   display: flex;
   align-items: center;
   padding: 100px 0 40px;
@@ -368,12 +351,11 @@ button { cursor: pointer; }
 .hero-ilu-wrap { position: relative; }
 .car-svg { width: 100%; height: auto; }
 
-/* Badge Google – eliminado, info ya está en trust bar */
-
 /* =============================================
    TRUST BAR
 ============================================= */
-.trust-bar { background: var(--blue); padding: 14px 0; height: 48px; display: flex; align-items: center; }
+/* .trust-bar { background: var(--blue); padding: 10px 16px; height: 48px; display: flex; align-items: center; } */
+.trust-bar { background: var(--blue); padding: 13px 16px; display: flex; align-items: center; }
 
 .trust-items {
   display: flex;
@@ -862,11 +844,15 @@ button { cursor: pointer; }
 .footer { background: var(--dark); padding: 44px 0 0; }
 
 .footer-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
   padding-bottom: 32px;
   border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.footer-brand {
+  grid-column: 1 / -1;
 }
 
 .footer-brand-name {
