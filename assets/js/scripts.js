@@ -30,7 +30,8 @@ function trackClick(eventName, label) {
   if (typeof gtag !== 'undefined') {
     gtag('event', eventName, {
       event_category: 'cta',
-      event_label: label || eventName
+      event_label: label || eventName,
+      transport_type: 'beacon' 
     });
   }
 }
